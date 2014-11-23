@@ -4,6 +4,8 @@ from django.conf import settings
 
 from gcloud import storage as gc_storage
 
+import tempfile
+
 class GoogleCloudStorage(Storage):
     def __init__(self, bucket_name=None, project=None, client_email=None, private_key_path=None):
         self.bucket_name = bucket_name if bucket_name else settings.DJANGO_GCS_BUCKET
@@ -22,13 +24,19 @@ class GoogleCloudStorage(Storage):
     def _open(self, name, mode='rb'):
         gc_file = self.bucket.get_key(self.path(name))
 
-        return gc_file.get_contents_as_string()
+        temp_file = tempfile.TemporaryFile()
 
+        gc_file.download_to_file(temp_file)
+
+        temp_file.seek(0)
+
+        return temp_file
 
     def _save(self, name, content):
-        gc_file = self.bucket.get_key(self.path(name))
+        gc_file = self.bucket.new_key(self.path(name))
+        gc_file.set_contents_from_string(content)
 
-        gc_file.set_contents_as_string(content)
+        return gc_file.name
 
    
     def delete(self, name):
@@ -39,6 +47,6 @@ class GoogleCloudStorage(Storage):
 
     def exists(self, name):
         gc_file = self.bucket.get_key(self.path(name))
-
-        return gc_file.exists()
+        
+        return gc_file.exists() if gc_file else False
 
