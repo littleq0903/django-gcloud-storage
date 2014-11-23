@@ -48,7 +48,17 @@ try:
     }
 
 except ImportError:
-    raise ImportError('please configure test_secrets properly for running tests.')
+
+    if 'DJANGO_GCS_PROJECT' not in os.environ:
+        raise Exception('please provide Google Cloud Credentials in eithor environment vars or test_secrets.py')
+
+    gcs_settings = {
+        'DJANGO_GCS_PROJECT': os.environ['DJANGO_GCS_PROJECT'],
+        'DJANGO_GCS_CLIENT_EMAIL': os.environ['DJANGO_GCS_PROJECT'],
+        'DJANGO_GCS_PRIVATE_KEY_PATH': os.environ['DJANGO_GCS_PROJECT'],
+        'DJANGO_GCS_BUCKET': os.environ['DJANGO_GCS_PROJECT']
+    }
+
 
 all_settings = {}
 all_settings.update(test_settings)
