@@ -1,2 +1,1 @@
-Django
 -e git+ssh://git@github.com/GoogleCloudPlatform/gcloud-python.git#egg=gcloud
