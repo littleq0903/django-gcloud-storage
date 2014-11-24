@@ -54,9 +54,9 @@ except ImportError:
 
     gcs_settings = {
         'DJANGO_GCS_PROJECT': os.environ['DJANGO_GCS_PROJECT'],
-        'DJANGO_GCS_CLIENT_EMAIL': os.environ['DJANGO_GCS_PROJECT'],
-        'DJANGO_GCS_PRIVATE_KEY_PATH': os.environ['DJANGO_GCS_PROJECT'],
-        'DJANGO_GCS_BUCKET': os.environ['DJANGO_GCS_PROJECT']
+        'DJANGO_GCS_CLIENT_EMAIL': os.environ['DJANGO_GCS_CLIENT_EMAIL'],
+        'DJANGO_GCS_PRIVATE_KEY_PATH': os.environ['DJANGO_GCS_PRIVATE_KEY_PATH'],
+        'DJANGO_GCS_BUCKET': os.environ['DJANGO_GCS_BUCKET']
     }
 
 
