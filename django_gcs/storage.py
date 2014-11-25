@@ -3,6 +3,7 @@ from django.core.exceptions import ImproperlyConfigured
 from django.conf import settings
 
 from gcloud import storage as gc_storage
+from gcloud.storage import exceptions
 
 import tempfile
 
@@ -13,16 +14,21 @@ class GoogleCloudStorage(Storage):
         self.client_email = client_email if client_email else settings.DJANGO_GCS_CLIENT_EMAIL
         self.private_key_path = private_key_path if private_key_path else settings.DJANGO_GCS_PRIVATE_KEY_PATH
 
-        self.__gc_connection = gc_storage.get_connection(self.project, self.client_email, self.private_key_path)
-        self.bucket = self.__gc_connection.get_bucket(self.bucket_name)
+        self.gc_connection = gc_storage.get_connection(self.project, self.client_email, self.private_key_path)
+
+        try:
+            self.gc_bucket = self.gc_connection.get_bucket(self.bucket_name)
+        except exceptions.NotFound:
+            # if the bucket hasn't been created, create one
+            # TODO: creating buckets here is not functional, buckets won't be created.
+            self.gc_bucket = self.gc_connection.new_bucket(self.bucket_name)
 
     # Helpers
-
     def __get_key(self, name):
-        return self.bucket.get_key(name)
+        return self.gc_bucket.get_key(name)
+
 
     # required methods
-
     def path(self, name):
         return name
 
@@ -38,8 +44,9 @@ class GoogleCloudStorage(Storage):
 
         return temp_file
 
+
     def _save(self, name, content):
-        gc_file = self.bucket.new_key(self.path(name))
+        gc_file = self.gc_bucket.new_key(self.path(name))
         gc_file.set_contents_from_string(content)
 
         return gc_file.name
@@ -61,6 +68,7 @@ class GoogleCloudStorage(Storage):
         gc_file = self.__get_key(self.path(name))
 
         return gc_file.public_url
+
 
     def size(self, name):
         gc_file = self.__get_key(self.path(name))
