@@ -62,6 +62,8 @@ class GoogleCloudStorage(Storage):
 
         return gc_file.public_url
 
-        
+    def size(self, name):
+        gc_file = self.__get_key(self.path(name))
 
+        return gc_file.size
 

@@ -54,26 +54,29 @@ Namespaces are one honking great idea -- let's do more of those!"""
 
             # perform checking
             new_key = self.test_bucket.get_key(new_name)
-            assert new_key.exists()
+            self.assertTrue(new_key.exists())
 
     def test_open(self):
         downloaded_file = self.storage.open(self.test_existed_file_name, 'r')
 
-        assert downloaded_file.read() == self.test_existed_file_content
+        self.assertEqual(downloaded_file.read(), self.test_existed_file_content)
+
 
     def test_url(self):
         right_public_url = self.test_bucket.get_key(self.test_existed_file_name).public_url
         test_public_url = self.storage.url(self.test_existed_file_name)
 
-        assert right_public_url == test_public_url
+        self.assertEqual(right_public_url, test_public_url)
 
+    def test_size(self):
+        right_file_size = self.test_bucket.get_key(self.test_existed_file_name).size
+        test_file_size = self.storage.size(self.test_existed_file_name)
 
+        self.assertEqual(right_file_size, test_file_size)
 
-
+    def test_filefield(self):
+        # TODO: test if file field will work with django-gcs
+        pass
         
-        
-
-
-
 
 
