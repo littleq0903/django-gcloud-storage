@@ -4,3 +4,4 @@ coverage
 mock
 nose
 django-nose
+pillow

@@ -13,14 +13,16 @@ try:
 
         'DATABASES': {
             'default': {
-                'ENGINE': 'django.db.backends.sqlite3'
+                'ENGINE': 'django.db.backends.sqlite3',
+                'NAME': os.path.join(os.path.dirname(__file__), 'test.db'),
             }
         },
 
         'INSTALLED_APPS': [
             "django.contrib.auth",
             "django.contrib.contenttypes",
-            "django.contrib.sites"
+            "django.contrib.sites",
+            "test_app"
         ],
 
         'SITE_ID': 1,
@@ -68,6 +70,9 @@ settings.configure(**all_settings)
 
 import django
 django.setup()
+
+from django.core.management import call_command
+call_command('syncdb', migrate=True)
 
 from django_nose import NoseTestSuiteRunner
 

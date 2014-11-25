@@ -1,8 +1,12 @@
 from django.test import TestCase
+from django.core.files import File
 from django.core.files.base import ContentFile
+from django.core.files.images import ImageFile
 from django.core.files.storage import default_storage
 
 from django_gcs.storage import GoogleCloudStorage
+
+from test_app.models import TestModel
 
 class TestStorage(TestCase):
     def setUp(self):
@@ -32,6 +36,8 @@ Although never is often better than *right* now.
 If the implementation is hard to explain, it's a bad idea.
 If the implementation is easy to explain, it may be a good idea.
 Namespaces are one honking great idea -- let's do more of those!"""
+        self.test_img_path = 'misc/img/django_logo.png'
+        self.test_txt_path = 'misc/txt/python-zen.txt'
 
         # create a new bucket for testing purpose
         self.test_connection = self.storage.gc_connection
@@ -46,7 +52,7 @@ Namespaces are one honking great idea -- let's do more of those!"""
         all_keys = self.test_bucket.get_all_keys()
 
         keys_to_del = filter(lambda k: k.name.startswith("%s/" % self.test_folder_name), all_keys)
-        map(lambda k: k.delete(), keys_to_del)
+#        map(lambda k: k.delete(), keys_to_del)
 
 
     def test_save(self):
@@ -98,6 +104,11 @@ Namespaces are one honking great idea -- let's do more of those!"""
 
 
     def test_filefield(self):
-        # TODO: test if file field will work with django-gcs
-        pass
+
+        test_model_instance = TestModel.objects.create()
+        test_model_instance.image_file = ImageFile(open(self.test_img_path))
+        test_model_instance.text_file = ContentFile(open(self.test_txt_path))
+        test_model_instance.save()
+
+        # TODO: verify upload of both image and text files
         

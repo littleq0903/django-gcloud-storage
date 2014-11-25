@@ -1,4 +1,5 @@
 from django.core.files.storage import Storage
+from django.core.files import File
 from django.core.exceptions import ImproperlyConfigured
 from django.conf import settings
 
@@ -7,6 +8,7 @@ from gcloud.storage import exceptions
 
 import tempfile
 import re
+import io
 
 class GoogleCloudStorage(Storage):
     def __init__(self, bucket_name=None, project=None, client_email=None, private_key_path=None):
@@ -47,11 +49,19 @@ class GoogleCloudStorage(Storage):
 
 
     def _save(self, name, content):
+        # content := django.db.models.fields.files.FieldFile
         gc_file = self.gc_bucket.new_key(self.path(name))
-        gc_file.set_contents_from_string(content)
+
+        try:
+            content.seek(0)
+            gc_file.upload_from_file(content.file)
+        except io.UnsupportedOperation:
+            # some text file such as ContentFile will fail here cus it's not a real file and doesn't support fileno() operation, use string uplaoding approach
+
+            content.seek(0) # make sure file reading goes from head
+            gc_file.upload_from_string(content.read())
 
         return gc_file.name
-
    
     def delete(self, name):
         gc_file = self.__get_key(self.path(name))
@@ -108,12 +118,4 @@ class GoogleCloudStorage(Storage):
         files = map(extract_filename, keys_files)
 
         return reduced_dirs, files
-
-
-
-        
-
-
-        
-
 
