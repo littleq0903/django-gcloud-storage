@@ -6,6 +6,7 @@ from gcloud import storage as gc_storage
 from gcloud.storage import exceptions
 
 import tempfile
+import re
 
 class GoogleCloudStorage(Storage):
     def __init__(self, bucket_name=None, project=None, client_email=None, private_key_path=None):
@@ -74,4 +75,45 @@ class GoogleCloudStorage(Storage):
         gc_file = self.__get_key(self.path(name))
 
         return gc_file.size
+
+
+    def listdir(self, path):
+        def extract_foldername(name):
+            return re.search(r'^[^/]+', name).group(0)
+
+        def extract_filename(name):
+            return re.search(r'[^/]+$', name).group(0)
+
+        def extract_path(keys, path):
+            rtn = []
+            for name in keys:
+                new_name = re.search(r'^%s/(.*)$' % path, name).group(1)
+                rtn.append(new_name)
+
+            return rtn
+
+        # convert to string for speeding up
+        all_keys = [ k.name for k in self.gc_bucket.get_all_keys() ]
+
+        keys_under_path = extract_path(filter(lambda k: k.startswith(path), all_keys), path)
+        
+        # '/' in the name means the key is under a folder structure, we extract the folder name. otherwise, extract the file name
+        keys_files = filter(lambda k: '/' not in k, keys_under_path)
+        keys_contains_dir = filter(lambda k: '/' in k, keys_under_path)
+
+        # extract name
+        dirs = map(extract_foldername, keys_contains_dir)
+        reduced_dirs = list(tuple(dirs)) # dirs has duplicated names, remove them.
+
+        files = map(extract_filename, keys_files)
+
+        return reduced_dirs, files
+
+
+
+        
+
+
+        
+
 

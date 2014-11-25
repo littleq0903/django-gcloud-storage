@@ -41,7 +41,6 @@ Namespaces are one honking great idea -- let's do more of those!"""
         self.existed_file = self.test_bucket.new_key(self.test_existed_file_name)
         self.existed_file.upload_from_string(self.test_existed_file_content)
 
-
     def tearDown(self):
         # perform a clean up for restoring cloud storage
         all_keys = self.test_bucket.get_all_keys()
@@ -82,8 +81,20 @@ Namespaces are one honking great idea -- let's do more of those!"""
 
 
     def test_listdir(self):
-        # TODO: test list dirs method
-        pass
+        def new_content(key):
+            new_key = self.test_bucket.new_key( "%s/%s" % (self.test_folder_name, key))
+            new_key.upload_from_string('testing content')
+
+        # upload structural data
+        new_content('a1/b1/1.txt')
+        new_content('a1/b2/1.txt')
+        new_content('a1/1.txt')
+        new_content('a1/2.txt')
+
+        dirs, files = self.storage.listdir('%s/a1' % self.test_folder_name)
+
+        self.assertEquals(set(dirs), set([u"b1", u"b2"]))
+        self.assertEquals(set(files), set([u"1.txt", u"2.txt"]))
 
 
     def test_filefield(self):
