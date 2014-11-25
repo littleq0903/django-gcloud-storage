@@ -62,9 +62,10 @@ Namespaces are one honking great idea -- let's do more of those!"""
         assert downloaded_file.read() == self.test_existed_file_content
 
     def test_url(self):
+        right_public_url = self.test_bucket.get_key(self.test_existed_file_name).public_url
         test_public_url = self.storage.url(self.test_existed_file_name)
 
-        print test_public_url
+        assert right_public_url == test_public_url
 
 
 
