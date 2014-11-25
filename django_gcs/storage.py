@@ -16,13 +16,19 @@ class GoogleCloudStorage(Storage):
         self.__gc_connection = gc_storage.get_connection(self.project, self.client_email, self.private_key_path)
         self.bucket = self.__gc_connection.get_bucket(self.bucket_name)
 
+    # Helpers
+
+    def __get_key(self, name):
+        return self.bucket.get_key(name)
+
+    # required methods
 
     def path(self, name):
         return name
 
 
     def _open(self, name, mode='rb'):
-        gc_file = self.bucket.get_key(self.path(name))
+        gc_file = self.__get_key(self.path(name))
 
         temp_file = tempfile.TemporaryFile()
 
@@ -40,13 +46,22 @@ class GoogleCloudStorage(Storage):
 
    
     def delete(self, name):
-        gc_file = self.bucket.get_key(self.path(name))
+        gc_file = self.__get_key(self.path(name))
 
         gc_file.delete()
 
 
     def exists(self, name):
-        gc_file = self.bucket.get_key(self.path(name))
+        gc_file = self.__get_key(self.path(name))
         
         return gc_file.exists() if gc_file else False
+
+
+    def url(self, name):
+        gc_file = self.__get_key(self.path(name))
+
+        return gc_file.public_url
+
+        
+
 
