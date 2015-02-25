@@ -11,13 +11,14 @@ import re
 import io
 
 class GoogleCloudStorage(Storage):
-    def __init__(self, bucket_name=None, project=None, client_email=None, private_key_path=None):
+    def __init__(self, bucket_name=None, project=None, client_email=None, private_key_path=None, public=False):
         self.bucket_name = bucket_name if bucket_name else settings.DJANGO_GCS_BUCKET
         self.project = project if project else settings.DJANGO_GCS_PROJECT
         self.client_email = client_email if client_email else settings.DJANGO_GCS_CLIENT_EMAIL
         self.private_key_path = private_key_path if private_key_path else settings.DJANGO_GCS_PRIVATE_KEY_PATH
 
         self.gc_connection = gc_storage.get_connection(self.project, self.client_email, self.private_key_path)
+        self.public = public
 
         try:
             self.gc_bucket = self.gc_connection.get_bucket(self.bucket_name)
@@ -61,8 +62,11 @@ class GoogleCloudStorage(Storage):
             content.seek(0) # make sure file reading goes from head
             gc_file.upload_from_string(content.read())
 
+        if self.public:
+            gc_file.make_public()
+
         return gc_file.name
-   
+
     def delete(self, name):
         gc_file = self.__get_key(self.path(name))
 
@@ -71,7 +75,7 @@ class GoogleCloudStorage(Storage):
 
     def exists(self, name):
         gc_file = self.__get_key(self.path(name))
-        
+
         return gc_file.exists() if gc_file else False
 
 
@@ -106,7 +110,7 @@ class GoogleCloudStorage(Storage):
         all_keys = [ k.name for k in self.gc_bucket.get_all_keys() ]
 
         keys_under_path = extract_path(filter(lambda k: k.startswith(path), all_keys), path)
-        
+
         # '/' in the name means the key is under a folder structure, we extract the folder name. otherwise, extract the file name
         keys_files = filter(lambda k: '/' not in k, keys_under_path)
         keys_contains_dir = filter(lambda k: '/' in k, keys_under_path)
