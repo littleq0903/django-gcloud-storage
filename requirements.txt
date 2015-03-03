@@ -1,1 +1,1 @@
--e git+https://github.com/GoogleCloudPlatform/gcloud-python.git#egg=gcloud
+gcloud==0.3.0
