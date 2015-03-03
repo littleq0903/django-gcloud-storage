@@ -5,19 +5,18 @@ from django.conf import settings
 
 from gcloud import storage as gc_storage
 from gcloud.storage import exceptions
+from gcloud import credentials
 
 import tempfile
 import re
 import io
 
 class GoogleCloudStorage(Storage):
-    def __init__(self, bucket_name=None, project=None, client_email=None, private_key_path=None, public=False):
+    def __init__(self, bucket_name=None, project=None, public=False):
         self.bucket_name = bucket_name if bucket_name else settings.DJANGO_GCS_BUCKET
         self.project = project if project else settings.DJANGO_GCS_PROJECT
-        self.client_email = client_email if client_email else settings.DJANGO_GCS_CLIENT_EMAIL
-        self.private_key_path = private_key_path if private_key_path else settings.DJANGO_GCS_PRIVATE_KEY_PATH
 
-        self.gc_connection = gc_storage.get_connection(self.project, self.client_email, self.private_key_path)
+        self.gc_connection = gc_storage.get_connection(self.project)
         self.public = public
 
         try:

@@ -44,8 +44,6 @@ try:
 
     gcs_settings = {
         'DJANGO_GCS_PROJECT': test_secrets.DJANGO_GCS_PROJECT,
-        'DJANGO_GCS_CLIENT_EMAIL': test_secrets.DJANGO_GCS_CLIENT_EMAIL,
-        'DJANGO_GCS_PRIVATE_KEY_PATH': test_secrets.DJANGO_GCS_PRIVATE_KEY_PATH,
         'DJANGO_GCS_BUCKET': test_secrets.DJANGO_GCS_BUCKET
     }
 
