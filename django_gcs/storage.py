@@ -28,7 +28,7 @@ class GoogleCloudStorage(Storage):
 
     # Helpers
     def __get_key(self, name):
-        return self.gc_bucket.get_key(name)
+        return self.gc_bucket.get_blob(name)
 
 
     # required methods
@@ -50,7 +50,7 @@ class GoogleCloudStorage(Storage):
 
     def _save(self, name, content):
         # content := django.db.models.fields.files.FieldFile
-        gc_file = self.gc_bucket.new_key(self.path(name))
+        gc_file = self.gc_bucket.new_blob(self.path(name))
 
         try:
             content.seek(0)
