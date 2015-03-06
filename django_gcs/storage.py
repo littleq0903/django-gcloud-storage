@@ -4,7 +4,7 @@ from django.core.exceptions import ImproperlyConfigured
 from django.conf import settings
 
 from gcloud import storage as gc_storage
-from gcloud.storage import exceptions
+from gcloud import exceptions
 from gcloud import credentials
 
 import tempfile
