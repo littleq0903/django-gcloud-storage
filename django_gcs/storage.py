@@ -20,7 +20,7 @@ class GoogleCloudStorage(Storage):
         self.public = public
 
         try:
-            self.gc_bucket = self.gc_connection.get_bucket(self.bucket_name)
+            self.gc_bucket = gc_storage.get_bucket(self.bucket_name, self.gc_connection )
         except exceptions.NotFound:
             # if the bucket hasn't been created, create one
             # TODO: creating buckets here is not functional, buckets won't be created.
