@@ -1,40 +1,44 @@
 from django.core.files.storage import Storage
-from django.core.files import File
-from django.core.exceptions import ImproperlyConfigured
 from django.conf import settings
 
 from gcloud import storage as gc_storage
 from gcloud import exceptions
-from gcloud import credentials
 
 import tempfile
 import re
 import io
 
+
 class GoogleCloudStorage(Storage):
     def __init__(self, bucket_name=None, project=None, public=False):
-        self.bucket_name = bucket_name if bucket_name else settings.DJANGO_GCS_BUCKET
+        self.bucket_name = (
+            bucket_name
+            if bucket_name
+            else settings.DJANGO_GCS_BUCKET
+        )
         self.project = project if project else settings.DJANGO_GCS_PROJECT
 
         self.gc_connection = gc_storage.get_connection(self.project)
         self.public = public
 
         try:
-            self.gc_bucket = gc_storage.get_bucket(self.bucket_name, self.gc_connection )
+            self.gc_bucket = gc_storage.get_bucket(
+                self.bucket_name,
+                self.gc_connection
+            )
         except exceptions.NotFound:
             # if the bucket hasn't been created, create one
-            # TODO: creating buckets here is not functional, buckets won't be created.
+            # TODO: creating buckets here is not functional,
+            # buckets won't be created.
             self.gc_bucket = self.gc_connection.new_bucket(self.bucket_name)
 
     # Helpers
     def __get_key(self, name):
         return self.gc_bucket.get_blob(name)
 
-
     # required methods
     def path(self, name):
         return name
-
 
     def _open(self, name, mode='rb'):
         gc_file = self.__get_key(self.path(name))
@@ -47,7 +51,6 @@ class GoogleCloudStorage(Storage):
 
         return temp_file
 
-
     def _save(self, name, content):
         # content := django.db.models.fields.files.FieldFile
         gc_file = self.gc_bucket.new_blob(self.path(name))
@@ -56,9 +59,11 @@ class GoogleCloudStorage(Storage):
             content.seek(0)
             gc_file.upload_from_file(content.file)
         except io.UnsupportedOperation:
-            # some text file such as ContentFile will fail here cus it's not a real file and doesn't support fileno() operation, use string uplaoding approach
+            # some text file such as ContentFile will fail here
+            # cus it's not a real file and doesn't support fileno() operation,
+            # use string uplaoding approach
 
-            content.seek(0) # make sure file reading goes from head
+            content.seek(0)     # make sure file reading goes from head
             gc_file.upload_from_string(content.read())
 
         if self.public:
@@ -71,24 +76,18 @@ class GoogleCloudStorage(Storage):
 
         gc_file.delete()
 
-
     def exists(self, name):
         gc_file = self.__get_key(self.path(name))
 
         return gc_file.exists() if gc_file else False
 
-
     def url(self, name):
         gc_file = self.__get_key(self.path(name))
-
         return gc_file.public_url
-
 
     def size(self, name):
         gc_file = self.__get_key(self.path(name))
-
         return gc_file.size
-
 
     def listdir(self, path):
         def extract_foldername(name):
@@ -106,19 +105,22 @@ class GoogleCloudStorage(Storage):
             return rtn
 
         # convert to string for speeding up
-        all_keys = [ k.name for k in self.gc_bucket.get_all_keys() ]
+        all_keys = [k.name for k in self.gc_bucket.get_all_keys()]
+        keys_under_path = extract_path(
+            filter(lambda k: k.startswith(path), all_keys), path
+        )
 
-        keys_under_path = extract_path(filter(lambda k: k.startswith(path), all_keys), path)
-
-        # '/' in the name means the key is under a folder structure, we extract the folder name. otherwise, extract the file name
+        # '/' in the name means the key is under a folder structure,
+        # we extract the folder name. otherwise, extract the file name
         keys_files = filter(lambda k: '/' not in k, keys_under_path)
         keys_contains_dir = filter(lambda k: '/' in k, keys_under_path)
 
         # extract name
         dirs = map(extract_foldername, keys_contains_dir)
-        reduced_dirs = list(tuple(dirs)) # dirs has duplicated names, remove them.
+
+        # dirs has duplicated names, remove them.
+        reduced_dirs = list(tuple(dirs))
 
         files = map(extract_filename, keys_files)
 
         return reduced_dirs, files
-
