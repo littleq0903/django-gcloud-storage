@@ -3,7 +3,7 @@ import django_gcs
 
 setup_options = {
         'name': 'django-gcloud-storage',
-        'versions': django_gcs.__version__,
+        'version': django_gcs.__version__,
         'packages': find_packages(),
 
         'author': 'Colin Su',
@@ -24,5 +24,3 @@ setup_options = {
 }
 
 setup(**setup_options)
-
-
