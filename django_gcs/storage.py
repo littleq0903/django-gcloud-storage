@@ -125,7 +125,7 @@ class GoogleCloudStorage(Storage):
         dirs = map(extract_foldername, keys_contains_dir)
 
         # dirs has duplicated names, remove them.
-        reduced_dirs = list(tuple(dirs))
+        reduced_dirs = list(set(dirs))
 
         files = map(extract_filename, keys_files)
 
