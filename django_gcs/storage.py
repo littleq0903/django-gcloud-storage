@@ -1,12 +1,14 @@
+import io
+import re
+import sys
+import tempfile
+from pprint import pprint
+
+import oauth2client.client
 from django.core.files.storage import Storage
 from django.conf import settings
-
 from gcloud import storage as gc_storage
 from gcloud import exceptions
-
-import tempfile
-import re
-import io
 
 
 class GoogleCloudStorage(Storage):
@@ -29,6 +31,12 @@ class GoogleCloudStorage(Storage):
             # TODO: creating buckets here is not functional,
             # buckets won't be created.
             self.gc_bucket = self.gc_connection.new_bucket(self.bucket_name)
+        except oauth2client.client.AccessTokenRefreshError:
+            # Temporarily ignore this exception
+            # It causes 502 Bad Gateway on GCE,
+            # but it seems OK to ignore this exception.
+            pprint(sys.exc_info())
+            pass
 
     # Helpers
     def __get_key(self, name):
