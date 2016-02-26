@@ -17,14 +17,12 @@ class GoogleCloudStorage(Storage):
             else settings.DJANGO_GCS_BUCKET
         )
         self.project = project if project else settings.DJANGO_GCS_PROJECT
-
-        self.gc_connection = gc_storage.get_connection(self.project)
         self.public = public
 
         try:
             self.gc_bucket = gc_storage.get_bucket(
                 self.bucket_name,
-                self.gc_connection
+                self.project,
             )
         except exceptions.NotFound:
             # if the bucket hasn't been created, create one
