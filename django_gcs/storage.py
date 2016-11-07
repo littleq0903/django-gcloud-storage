@@ -13,6 +13,7 @@ from gcloud import exceptions
 
 class GoogleCloudStorage(Storage):
     def __init__(self, bucket_name=None, project=None, public=False):
+	client = gc_storage.Client()
         self.bucket_name = (
             bucket_name
             if bucket_name
@@ -22,10 +23,7 @@ class GoogleCloudStorage(Storage):
         self.public = public
 
         try:
-            self.gc_bucket = gc_storage.get_bucket(
-                self.bucket_name,
-                self.project,
-            )
+            self.gc_bucket = client.get_bucket(self.bucket_name)
         except exceptions.NotFound:
             # if the bucket hasn't been created, create one
             # TODO: creating buckets here is not functional,
