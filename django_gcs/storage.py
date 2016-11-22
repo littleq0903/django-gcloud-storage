@@ -13,7 +13,7 @@ from gcloud import exceptions
 
 class GoogleCloudStorage(Storage):
     def __init__(self, bucket_name=None, project=None, public=False):
-	client = gc_storage.Client()
+        client = gc_storage.Client()
         self.bucket_name = (
             bucket_name
             if bucket_name
@@ -57,12 +57,12 @@ class GoogleCloudStorage(Storage):
 
     def _save(self, name, content):
         # content := django.db.models.fields.files.FieldFile
-        gc_file = self.gc_bucket.new_blob(self.path(name))
+        gc_file = self.gc_bucket.blob(self.path(name))
 
         try:
             content.seek(0)
             gc_file.upload_from_file(content.file)
-        except io.UnsupportedOperation:
+        except (io.UnsupportedOperation, ValueError):
             # some text file such as ContentFile will fail here
             # cus it's not a real file and doesn't support fileno() operation,
             # use string uplaoding approach
