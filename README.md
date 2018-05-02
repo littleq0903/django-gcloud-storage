@@ -1,4 +1,6 @@
-#django-gcloud-storage [![Build Status](https://travis-ci.org/littleq0903/django-gcloud-storage.svg?branch=master)](https://travis-ci.org/littleq0903/django-gcloud-storage)
+# django-gcloud-storage 
+
+Build status: [![Build Status](https://travis-ci.org/littleq0903/django-gcloud-storage.svg?branch=master)](https://travis-ci.org/littleq0903/django-gcloud-storage)
 
 Django Storage Backend on Google Cloud Storage with gcloud-python.
 
